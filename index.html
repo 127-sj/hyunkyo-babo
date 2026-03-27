@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>임현교 키우기 - 돼지 다마고치</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="body-bg" class="flex flex-col items-center justify-center min-h-screen p-4 transition-colors duration-500">
+
+    <!-- Game Container -->
+    <div id="game-container" class="bg-white rounded-[40px] shadow-2xl p-6 w-full max-w-md border-8 border-pink-200 relative overflow-hidden transition-opacity duration-500">
+        
+        <!-- Header: Top Items -->
+        <div class="flex justify-between items-center mb-4">
+            <div class="bg-pink-100 px-3 py-1.5 rounded-full text-pink-600 font-bold text-sm">
+                나이: <span id="age">0</span>살
+            </div>
+            <div class="bg-yellow-100 px-3 py-1.5 rounded-full text-yellow-600 font-bold text-sm">
+                💰 <span id="money">0</span>원
+            </div>
+        </div>
+        <div class="text-center mb-4">
+            <span id="status-text" class="text-gray-500 text-sm italic">기분이 좋아요!</span>
+        </div>
+
+        <!-- Character Display Area -->
+        <div class="relative h-64 flex flex-col items-center justify-end pb-8 bg-blue-50 rounded-3xl mb-6 border-4 border-dashed border-blue-100">
+            <!-- Particles/Effects Container -->
+            <div id="effect-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center text-4xl overflow-hidden"></div>
+            
+            <div id="character-container" class="floating flex flex-col items-center">
+                <!-- Speech Bubble -->
+                <div id="speech-bubble" class="speech-bubble">안녕!</div>
+
+                <!-- Pig SVG/CSS composite -->
+                <div id="pig-wrapper" class="pig-wrapper cursor-pointer focus:outline-none" onclick="pokeCharacter()">
+                    <div class="pig-head">
+                        <div class="ear left"></div>
+                        <div class="ear right"></div>
+                        <div class="eyes">
+                            <div id="eye-left" class="eye"></div>
+                            <div id="eye-right" class="eye"></div>
+                        </div>
+                        <div class="snout">
+                            <div class="nostril"></div>
+                            <div class="nostril"></div>
+                        </div>
+                        <div id="mouth" class="mouth"></div>
+                    </div>
+                    <!-- Body scales with hunger -->
+                    <div id="pig-body" class="pig-body"></div>
+                </div>
+            </div>
+            
+            <!-- Level Label -->
+            <div id="stage-label" class="absolute bottom-2 bg-white/80 px-3 py-1 rounded-full text-xs text-blue-500 font-bold z-10 shadow-sm">
+                아기 돼지
+            </div>
+        </div>
+
+        <!-- Status Bars -->
+        <div class="space-y-3 mb-6">
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span>🍚 배고픔</span>
+                    <span id="hunger-val">100%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="hunger-bar" class="status-bar h-full bg-orange-400 w-full"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span>🧼 청결도</span>
+                    <span id="clean-val">100%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="clean-bar" class="status-bar h-full bg-blue-400 w-full"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span>⚡ 에너지</span>
+                    <span id="energy-val">100%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="energy-bar" class="status-bar h-full bg-yellow-400 w-full"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span>❤️ 행복도</span>
+                    <span id="happy-val">100%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="happy-bar" class="status-bar h-full bg-pink-500 w-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <!-- Changed to a 5-column grid for the buttons -->
+        <div class="grid grid-cols-5 gap-2">
+            <!-- 1. Open Shop (instead of Feed) -->
+            <button onclick="openShop()" class="flex flex-col items-center px-1 py-2 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors">
+                <span class="text-xl mb-1">🏪</span>
+                <span class="text-[10px] font-bold text-orange-600">밥 구매</span>
+            </button>
+            <button onclick="interact('wash')" class="flex flex-col items-center px-1 py-2 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
+                <span class="text-xl mb-1">🧼</span>
+                <span class="text-[10px] font-bold text-blue-600">씻기기</span>
+            </button>
+            <button onclick="interact('sleep')" class="flex flex-col items-center px-1 py-2 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors">
+                <span class="text-xl mb-1">💤</span>
+                <span class="text-[10px] font-bold text-indigo-600">재우기</span>
+            </button>
+            <button onclick="interact('play')" class="flex flex-col items-center px-1 py-2 bg-pink-50 hover:bg-pink-100 rounded-xl transition-colors">
+                <span class="text-xl mb-1">⚽</span>
+                <span class="text-[10px] font-bold text-pink-600">놀기</span>
+            </button>
+            <!-- 5. Work Button -->
+            <button onclick="interact('work')" class="flex flex-col items-center px-1 py-2 bg-green-50 hover:bg-green-100 rounded-xl transition-colors">
+                <span class="text-xl mb-1">💼</span>
+                <span class="text-[10px] font-bold text-green-600">알바가기</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shop-modal" class="fixed inset-0 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-3xl w-80 shadow-2xl relative">
+            <button onclick="closeShop()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold">✕</button>
+            <h2 class="text-xl font-bold mb-4 text-center">음식 상점</h2>
+            <div class="flex justify-between mb-4 bg-yellow-50 px-3 py-2 rounded-xl text-yellow-700 font-bold">
+                <span>내 돈:</span>
+                <span id="shop-money">0원</span>
+            </div>
+            <div class="space-y-3">
+                <button onclick="buyFood('apple')" class="w-full flex items-center justify-between p-3 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🍎</span>
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800">사과 (10원)</div>
+                            <div class="text-[10px] text-gray-500">배고픔 +20, 행복 +5</div>
+                        </div>
+                    </div>
+                </button>
+                <button onclick="buyFood('burger')" class="w-full flex items-center justify-between p-3 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🍔</span>
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800">햄버거 (30원)</div>
+                            <div class="text-[10px] text-gray-500">배고픔 +50, 행복 +10</div>
+                        </div>
+                    </div>
+                </button>
+                <button onclick="buyFood('steak')" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 rounded-xl transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🥩</span>
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800">프리미엄 고기 (50원)</div>
+                            <div class="text-[10px] text-gray-500">배고픔 +100, 행복 +30</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Overlay (Game Over/Win) -->
+    <div id="overlay" class="fixed inset-0 modal hidden flex flex-col items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-[30px] text-center max-w-xs shadow-2xl">
+            <div id="overlay-icon" class="text-6xl mb-4 text-center flex justify-center w-full">💀</div>
+            <h2 id="overlay-title" class="text-2xl font-bold mb-2">게임 오버</h2>
+            <p id="overlay-desc" class="text-gray-600 mb-6 font-bold whitespace-pre-wrap">임현교가 너무 배고파서 떠났어요...</p>
+            <button onclick="resetGame()" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold hover:bg-pink-600 transition-transform active:scale-95 w-full">
+                다시 키우기
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
